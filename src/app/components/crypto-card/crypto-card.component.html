@@ -1,0 +1,8 @@
+<div
+  class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+>
+  <div class="font-semibold text-lg mb-4">{{ crypto.symbol }}</div>
+  <div class="text-green-500 font-medium">
+    {{ (+crypto.price).toFixed(8) }}
+  </div>
+</div>
