@@ -1,0 +1,16 @@
+<div class="min-h-screen bg-gray-100 p-8">
+  <div class="container mx-auto">
+    <button
+      [routerLink]="['/']"
+      class="mb-4 flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+    >
+      <img src="assets/images/left-arrow.svg" alt="Back" class="h-6 w-6" />
+      <span class="ml-2">Back to Home</span>
+    </button>
+
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h1 class="text-2xl font-bold mb-6">{{ symbol }} Price Chart</h1>
+      <div #chartContainer class="w-full"></div>
+    </div>
+  </div>
+</div>

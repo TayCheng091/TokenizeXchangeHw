@@ -7,15 +7,37 @@ export interface CryptoPrice {
   price: string;
 }
 
+export interface CandleStickData {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class CryptoService {
-  private apiUrl = 'https://api.binance.com/api/v3/ticker/price';
+  private baseUrl = 'https://api.binance.com/api/v3';
 
   constructor(private http: HttpClient) {}
 
   getPrices(): Observable<CryptoPrice[]> {
-    return this.http.get<CryptoPrice[]>(this.apiUrl);
+    return this.http.get<CryptoPrice[]>(`${this.baseUrl}/ticker/price`);
+  }
+
+  getKlineData(
+    symbol: string,
+    interval: string = '1d',
+    limit: number = 1000
+  ): Observable<any> {
+    const params = {
+      symbol,
+      interval,
+      limit: limit.toString(),
+    };
+
+    return this.http.get(`${this.baseUrl}/klines`, { params });
   }
 }

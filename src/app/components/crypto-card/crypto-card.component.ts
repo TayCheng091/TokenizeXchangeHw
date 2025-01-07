@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 
+import { Router } from '@angular/router';
 import { CryptoPrice } from '../../services/crypto.service';
 
 @Component({
@@ -8,4 +9,10 @@ import { CryptoPrice } from '../../services/crypto.service';
 })
 export class CryptoCardComponent {
   @Input() crypto!: CryptoPrice;
+
+  constructor(private router: Router) {}
+
+  onClick() {
+    this.router.navigate(['/crypto', this.crypto.symbol]);
+  }
 }
