@@ -17,7 +17,7 @@ export interface KlineData {
   providedIn: 'root',
 })
 export class WebsocketService {
-  private socket$!: WebSocketSubject<any>;
+  private socket$!: WebSocketSubject<any> | null;
   private baseUrl = 'wss://stream.binance.com:9443/ws';
 
   constructor() {}
@@ -39,6 +39,7 @@ export class WebsocketService {
   disconnect() {
     if (this.socket$) {
       this.socket$.complete();
+      this.socket$ = null;
     }
   }
 }

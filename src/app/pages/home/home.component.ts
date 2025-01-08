@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { CryptoPrice, CryptoService } from '../../services/crypto.service';
 
+import { CryptoPrice } from '../../models/share.model';
+import { CryptoService } from '../../services/crypto.service';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',

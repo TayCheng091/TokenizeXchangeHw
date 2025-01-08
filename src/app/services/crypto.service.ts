@@ -1,19 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
-export interface CryptoPrice {
-  symbol: string;
-  price: string;
-}
-
-export interface CandleStickData {
-  time: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-}
+import { CryptoPrice } from '../models/share.model';
 
 @Injectable({
   providedIn: 'root',

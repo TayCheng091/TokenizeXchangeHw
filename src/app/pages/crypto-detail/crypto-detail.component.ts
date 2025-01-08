@@ -5,9 +5,11 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 import { IChartApi, createChart } from 'lightweight-charts';
+import { ChartInterval, IntervalOption } from '../../models/share.model';
 
+import { ActivatedRoute } from '@angular/router';
+import { ISeriesApi } from 'lightweight-charts';
 import { Subscription } from 'rxjs';
 import { CryptoService } from '../../services/crypto.service';
 import { WebsocketService } from '../../services/websocket.service';
@@ -21,12 +23,29 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
 
   public symbol!: string;
   private chart!: IChartApi;
-  private candlestickSeries: any;
+  private candlestickSeries!: ISeriesApi<'Candlestick'>;
   private wsSubscription?: Subscription;
+  public selectedInterval = '12h';
+  public intervals: IntervalOption[] = [
+    { value: ChartInterval.ONE_MINUTE, viewValue: '1 Minute' },
+    { value: ChartInterval.THREE_MINUTES, viewValue: '3 Minutes' },
+    { value: ChartInterval.FIVE_MINUTES, viewValue: '5 Minutes' },
+    { value: ChartInterval.FIFTEEN_MINUTES, viewValue: '15 Minutes' },
+    { value: ChartInterval.THIRTY_MINUTES, viewValue: '30 Minutes' },
+    { value: ChartInterval.ONE_HOUR, viewValue: '1 Hour' },
+    { value: ChartInterval.TWO_HOURS, viewValue: '2 Hours' },
+    { value: ChartInterval.FOUR_HOURS, viewValue: '4 Hours' },
+    { value: ChartInterval.SIX_HOURS, viewValue: '6 Hours' },
+    { value: ChartInterval.EIGHT_HOURS, viewValue: '8 Hours' },
+    { value: ChartInterval.TWELVE_HOURS, viewValue: '12 Hours' },
+    { value: ChartInterval.ONE_DAY, viewValue: '1 Day' },
+    { value: ChartInterval.THREE_DAYS, viewValue: '3 Days' },
+    { value: ChartInterval.ONE_WEEK, viewValue: '1 Week' },
+    { value: ChartInterval.ONE_MONTH, viewValue: '1 Month' },
+  ];
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private wsService: WebsocketService,
     private cryptoService: CryptoService
   ) {}
@@ -38,23 +57,26 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
   }
 
   private fetchHistoricalData() {
-    this.cryptoService.getKlineData(this.symbol).subscribe({
-      next: (data: any) => {
-        const candleStickData = data.map((item: any) => ({
-          time: item[0] / 1000,
-          open: parseFloat(item[1]),
-          high: parseFloat(item[2]),
-          low: parseFloat(item[3]),
-          close: parseFloat(item[4]),
-        }));
-
-        this.initChart(candleStickData);
-        this.candlestickSeries.setData(candleStickData);
-      },
-      error: (error) => {
-        console.error('Failed to fetch historical data:', error);
-      },
-    });
+    this.cryptoService
+      .getKlineData(this.symbol, this.selectedInterval)
+      .subscribe({
+        next: (data: any) => {
+          const candleStickData = data.map((item: any) => ({
+            time: item[0] / 1000,
+            open: parseFloat(item[1]),
+            high: parseFloat(item[2]),
+            low: parseFloat(item[3]),
+            close: parseFloat(item[4]),
+          }));
+          if (!this.candlestickSeries) {
+            this.initChart(candleStickData);
+          }
+          this.candlestickSeries.setData(candleStickData);
+        },
+        error: (error) => {
+          console.error('Failed to fetch historical data:', error);
+        },
+      });
   }
 
   private initChart(candleStickData: any) {
@@ -98,7 +120,7 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
 
   private connectToWebSocket() {
     this.wsSubscription = this.wsService
-      .connectToKlineStream(this.symbol)
+      .connectToKlineStream(this.symbol, this.selectedInterval)
       .subscribe({
         next: (data: any) => {
           const kline = data.k;
@@ -126,5 +148,12 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
     if (this.chart) {
       this.chart.remove();
     }
+  }
+
+  onIntervalChange(interval: string) {
+    this.selectedInterval = interval;
+    this.wsService.disconnect(); // 斷開舊的 WebSocket 連接
+    this.fetchHistoricalData();
+    this.connectToWebSocket();
   }
 }

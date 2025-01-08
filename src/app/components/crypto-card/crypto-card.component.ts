@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 import { Router } from '@angular/router';
-import { CryptoPrice } from '../../services/crypto.service';
+import { CryptoPrice } from '../../models/share.model';
 
 @Component({
   selector: 'app-crypto-card',

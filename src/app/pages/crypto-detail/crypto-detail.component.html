@@ -9,7 +9,29 @@
     </button>
 
     <div class="bg-white rounded-lg shadow-lg p-6">
-      <h1 class="text-2xl font-bold mb-6">{{ symbol }} Price Chart</h1>
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">{{ symbol }} Price Chart</h1>
+        <div class="relative">
+          <select
+            [ngModel]="selectedInterval"
+            (ngModelChange)="onIntervalChange($event)"
+            class="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-8 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option *ngFor="let interval of intervals" [value]="interval.value">
+              {{ interval.viewValue }}
+            </option>
+          </select>
+          <div
+            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700"
+          >
+            <img
+              src="assets/images/down-arrow.svg"
+              alt="Select"
+              class="h-4 w-4"
+            />
+          </div>
+        </div>
+      </div>
       <div #chartContainer class="w-full"></div>
     </div>
   </div>
