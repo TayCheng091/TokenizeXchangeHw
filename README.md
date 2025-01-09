@@ -1,27 +1,36 @@
-# TokenizeXchangeHw
+# Crypto Price Tracker
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.3.11.
+A real-time cryptocurrency price tracking application built with Angular. This app displays live cryptocurrency prices and interactive candlestick charts using Binance's public API.
 
-## Development server
+## Features
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- Real-time cryptocurrency price updates
+- Interactive candlestick charts
+- Multiple time interval options (1m, 5m, 1h, 1d, etc.)
+- WebSocket connection for live data
+- Responsive design
 
-## Code scaffolding
+## Technical Stack
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- **Frontend**: Angular
+- **Charts**: Lightweight Charts
+- **API**: Binance Public API
+- **Real-time Data**: WebSocket
+- **Styling**: Tailwind CSS
 
-## Build
+## Main Components
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+- **Home Page**: Displays a list of cryptocurrency prices
+- **Crypto Detail**: Shows detailed candlestick chart with multiple time intervals
+- **Crypto Card**: Reusable component for displaying individual crypto prices
 
-## Running unit tests
+## Services
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+- **Crypto Service**: Handles API calls for crypto data
+- **WebSocket Service**: Manages real-time data connections
+- **Loading Service**: Controls loading state across the app
 
-## Running end-to-end tests
+## Getting Started
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+1. Clone the repository
+2. Install dependencies:
