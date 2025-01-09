@@ -1,18 +1,16 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CryptoPrice } from '../models/share.model';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CryptoService {
-  private baseUrl = 'https://api.binance.com/api/v3';
-
-  constructor(private http: HttpClient) {}
+  constructor(private apiService: ApiService) {}
 
   getPrices(): Observable<CryptoPrice[]> {
-    return this.http.get<CryptoPrice[]>(`${this.baseUrl}/ticker/price`);
+    return this.apiService.get<CryptoPrice[]>('/ticker/price');
   }
 
   getKlineData(
@@ -26,6 +24,6 @@ export class CryptoService {
       limit: limit.toString(),
     };
 
-    return this.http.get(`${this.baseUrl}/klines`, { params });
+    return this.apiService.get('/klines', params);
   }
 }
