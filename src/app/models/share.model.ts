@@ -49,7 +49,6 @@ export type KlineData = [
   string // Ignore
 ];
 
-// 定義完整的K線數據陣列型別
 export type KlineDataArray = KlineData[];
 
 export interface KlineWebSocketData {

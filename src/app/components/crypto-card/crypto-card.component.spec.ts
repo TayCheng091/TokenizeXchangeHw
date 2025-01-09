@@ -23,7 +23,6 @@ describe('CryptoCardComponent', () => {
     fixture = TestBed.createComponent(CryptoCardComponent);
     component = fixture.componentInstance;
 
-    // 設置必要的 @Input() 數據
     component.crypto = {
       symbol: 'BTCUSDT',
       price: '45000.12345678',

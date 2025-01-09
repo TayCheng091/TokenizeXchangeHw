@@ -111,7 +111,6 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
       priceFormat: {
         type: 'custom',
         formatter: (price: number) => {
-          // 根據價格範圍返回不同格式
           if (price < 0.0001) {
             return price.toFixed(8);
           } else if (price < 0.01) {
