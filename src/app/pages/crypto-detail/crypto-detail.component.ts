@@ -5,12 +5,22 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { IChartApi, createChart } from 'lightweight-charts';
-import { ChartInterval, IntervalOption } from '../../models/share.model';
+import {
+  CandlestickData,
+  IChartApi,
+  Time,
+  createChart,
+} from 'lightweight-charts';
+import {
+  ChartInterval,
+  IntervalOption,
+  KlineDataArray,
+} from '../../models/share.model';
 
 import { ActivatedRoute } from '@angular/router';
 import { ISeriesApi } from 'lightweight-charts';
 import { Subscription } from 'rxjs';
+import { KlineWebSocketData } from '../../models/share.model';
 import { CryptoService } from '../../services/crypto.service';
 import { WebsocketService } from '../../services/websocket.service';
 
@@ -25,7 +35,7 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
   private chart!: IChartApi;
   private candlestickSeries!: ISeriesApi<'Candlestick'>;
   private wsSubscription?: Subscription;
-  public selectedInterval = '12h';
+  public selectedInterval: ChartInterval = ChartInterval.ONE_DAY;
   public intervals: IntervalOption[] = [
     { value: ChartInterval.ONE_MINUTE, viewValue: '1 Minute' },
     { value: ChartInterval.THREE_MINUTES, viewValue: '3 Minutes' },
@@ -60,9 +70,9 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
     this.cryptoService
       .getKlineData(this.symbol, this.selectedInterval)
       .subscribe({
-        next: (data: any) => {
-          const candleStickData = data.map((item: any) => ({
-            time: item[0] / 1000,
+        next: (data: KlineDataArray) => {
+          const candleStickData: CandlestickData<Time>[] = data.map((item) => ({
+            time: (item[0] / 1000) as Time,
             open: parseFloat(item[1]),
             high: parseFloat(item[2]),
             low: parseFloat(item[3]),
@@ -79,7 +89,7 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
       });
   }
 
-  private initChart(candleStickData: any) {
+  private initChart(candleStickData: CandlestickData<Time>[]) {
     this.chart = createChart(this.chartContainer.nativeElement, {
       width: 800,
       height: 400,
@@ -122,10 +132,10 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
     this.wsSubscription = this.wsService
       .connectToKlineStream(this.symbol, this.selectedInterval)
       .subscribe({
-        next: (data: any) => {
+        next: (data: KlineWebSocketData) => {
           const kline = data.k;
           this.updateChart({
-            time: kline.t / 1000,
+            time: (kline.t / 1000) as Time,
             open: parseFloat(kline.o),
             high: parseFloat(kline.h),
             low: parseFloat(kline.l),
@@ -136,7 +146,7 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
       });
   }
 
-  private updateChart(candlestick: any) {
+  private updateChart(candlestick: CandlestickData<Time>) {
     this.candlestickSeries.update(candlestick);
   }
 
@@ -150,7 +160,7 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  onIntervalChange(interval: string) {
+  onIntervalChange(interval: ChartInterval) {
     this.selectedInterval = interval;
     this.wsService.disconnect(); // 斷開舊的 WebSocket 連接
     this.fetchHistoricalData();

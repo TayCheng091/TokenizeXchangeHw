@@ -1,6 +1,11 @@
+import {
+  ChartInterval,
+  CryptoPrice,
+  KlineDataArray,
+} from '../models/share.model';
+
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CryptoPrice } from '../models/share.model';
 import { ApiService } from './api.service';
 
 @Injectable({
@@ -15,9 +20,9 @@ export class CryptoService {
 
   getKlineData(
     symbol: string,
-    interval: string = '1d',
+    interval: ChartInterval = ChartInterval.ONE_DAY,
     limit: number = 1000
-  ): Observable<any> {
+  ): Observable<KlineDataArray> {
     const params = {
       symbol,
       interval,

@@ -33,3 +33,32 @@ export interface CandleStickData {
   low: number;
   close: number;
 }
+
+export type KlineData = [
+  number, // Open time
+  string, // Open price
+  string, // High price
+  string, // Low price
+  string, // Close price
+  string, // Volume
+  number, // Close time
+  string, // Quote asset volume
+  number, // Number of trades
+  string, // Taker buy base asset volume
+  string, // Taker buy quote asset volume
+  string // Ignore
+];
+
+// 定義完整的K線數據陣列型別
+export type KlineDataArray = KlineData[];
+
+export interface KlineWebSocketData {
+  k: {
+    t: number;
+    o: string;
+    h: string;
+    l: string;
+    c: string;
+    v: string;
+  };
+}
