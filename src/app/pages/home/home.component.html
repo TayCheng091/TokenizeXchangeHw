@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gray-100">
-  <div class="container mx-auto px-4 py-8">
+  <div class="container mx-auto px-4 py-8 h-screen flex flex-col">
     <h1 class="text-3xl font-bold mb-6 text-center">Crypto Price Tracker</h1>
 
     <div class="mb-6">
@@ -12,13 +12,36 @@
       />
     </div>
 
+    <!-- Error Message -->
+    <div *ngIf="error" class="mb-6 text-center text-red-600">
+      {{ error }}
+    </div>
+
+    <!-- Empty State -->
     <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+      *ngIf="!error && filteredPrices.length === 0"
+      class="flex-1 flex items-center justify-center text-gray-500"
     >
-      <app-crypto-card
-        *ngFor="let crypto of filteredPrices"
-        [crypto]="crypto"
-      ></app-crypto-card>
+      <p *ngIf="searchTerm">
+        No cryptocurrencies found matching "{{ searchTerm }}"
+      </p>
+      <p *ngIf="!searchTerm">No cryptocurrencies available</p>
+    </div>
+
+    <!-- Crypto List -->
+    <div
+      *ngIf="!error && filteredPrices.length > 0"
+      class="flex-1 overflow-hidden"
+    >
+      <div
+        class="h-full overflow-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-[minmax(116px,116px)]"
+      >
+        <app-crypto-card
+          class="h-[116px]"
+          *ngFor="let crypto of filteredPrices"
+          [crypto]="crypto"
+        ></app-crypto-card>
+      </div>
     </div>
   </div>
 </div>
