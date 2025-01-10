@@ -31,10 +31,10 @@ import { WebsocketService } from '../../services/websocket.service';
 export class CryptoDetailComponent implements OnInit, OnDestroy {
   @ViewChild('chartContainer') chartContainer!: ElementRef<HTMLElement>;
 
-  public symbol!: string;
   private chart!: IChartApi;
   private candlestickSeries!: ISeriesApi<'Candlestick'>;
   private wsSubscription?: Subscription;
+  public symbol!: string;
   public selectedInterval: ChartInterval = ChartInterval.ONE_DAY;
   public intervals: IntervalOption[] = [
     { value: ChartInterval.ONE_MINUTE, viewValue: '1 Minute' },
@@ -53,6 +53,7 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
     { value: ChartInterval.ONE_WEEK, viewValue: '1 Week' },
     { value: ChartInterval.ONE_MONTH, viewValue: '1 Month' },
   ];
+  klineData: KlineDataArray | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -62,31 +63,26 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.symbol = this.route.snapshot.paramMap.get('symbol') || '';
-    this.fetchHistoricalData();
+  }
+
+  ngAfterViewInit() {
+    this.klineData = this.route.snapshot.data['klineData'];
+    if (this.klineData) {
+      const candleStickData = this.formatKlineData(this.klineData);
+      this.initChart(candleStickData);
+    }
+
     this.connectToWebSocket();
   }
 
-  private fetchHistoricalData() {
-    this.cryptoService
-      .getKlineData(this.symbol, this.selectedInterval)
-      .subscribe({
-        next: (data: KlineDataArray) => {
-          const candleStickData: CandlestickData<Time>[] = data.map((item) => ({
-            time: (item[0] / 1000) as Time,
-            open: parseFloat(item[1]),
-            high: parseFloat(item[2]),
-            low: parseFloat(item[3]),
-            close: parseFloat(item[4]),
-          }));
-          if (!this.candlestickSeries) {
-            this.initChart(candleStickData);
-          }
-          this.candlestickSeries.setData(candleStickData);
-        },
-        error: (error) => {
-          console.error('Failed to fetch historical data:', error);
-        },
-      });
+  private formatKlineData(data: KlineDataArray): CandlestickData<Time>[] {
+    return data.map((item) => ({
+      time: (item[0] / 1000) as Time,
+      open: parseFloat(item[1]),
+      high: parseFloat(item[2]),
+      low: parseFloat(item[3]),
+      close: parseFloat(item[4]),
+    }));
   }
 
   private initChart(candleStickData: CandlestickData<Time>[]) {
@@ -159,9 +155,23 @@ export class CryptoDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  private fetchHistoricalData() {
+    this.cryptoService
+      .getKlineData(this.symbol, this.selectedInterval)
+      .subscribe({
+        next: (data: KlineDataArray) => {
+          const candleStickData = this.formatKlineData(data);
+          this.candlestickSeries.setData(candleStickData);
+        },
+        error: (error) => {
+          console.error('Failed to fetch historical data:', error);
+        },
+      });
+  }
+
   onIntervalChange(interval: ChartInterval) {
     this.selectedInterval = interval;
-    this.wsService.disconnect(); // 斷開舊的 WebSocket 連接
+    this.wsService.disconnect();
     this.fetchHistoricalData();
     this.connectToWebSocket();
   }
