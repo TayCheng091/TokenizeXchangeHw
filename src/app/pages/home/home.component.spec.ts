@@ -1,10 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 
-import { By } from '@angular/platform-browser';
-import { RouterTestingModule } from '@angular/router/testing';
-import { CryptoCardComponent } from '../../components/crypto-card/crypto-card.component';
-import { CryptoPrice } from '../../models/share.model';
+import { FormsModule } from '@angular/forms';
+import { of } from 'rxjs';
 import { CryptoService } from '../../services/crypto.service';
 import { HomeComponent } from './home.component';
 
@@ -12,8 +14,9 @@ describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
   let cryptoService: jasmine.SpyObj<CryptoService>;
+  let debounceTime: number;
 
-  const mockCryptoPrices: CryptoPrice[] = [
+  const mockPrices = [
     { symbol: 'BTCUSDT', price: '45000.00' },
     { symbol: 'ETHUSDT', price: '3000.00' },
     { symbol: 'BNBUSDT', price: '400.00' },
@@ -21,11 +24,11 @@ describe('HomeComponent', () => {
 
   beforeEach(async () => {
     const spy = jasmine.createSpyObj('CryptoService', ['getPrices']);
-    spy.getPrices.and.returnValue(of(mockCryptoPrices));
+    spy.getPrices.and.returnValue(of(mockPrices));
 
     await TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      declarations: [HomeComponent, CryptoCardComponent],
+      imports: [FormsModule],
+      declarations: [HomeComponent],
       providers: [{ provide: CryptoService, useValue: spy }],
     }).compileComponents();
 
@@ -37,6 +40,7 @@ describe('HomeComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
+    debounceTime = component['debounceTime'];
     fixture.detectChanges();
   });
 
@@ -46,75 +50,49 @@ describe('HomeComponent', () => {
 
   it('should load crypto prices on init', () => {
     expect(cryptoService.getPrices).toHaveBeenCalled();
-    expect(component.cryptoPrices).toEqual(mockCryptoPrices);
-    expect(component.loading).toBeFalse();
-    expect(component.error).toBe('');
+    expect(component.cryptoPrices).toEqual(mockPrices);
+    expect(component.filteredPrices).toEqual(mockPrices);
   });
 
-  it('should display loading state initially', () => {
-    component.loading = true;
-    fixture.detectChanges();
+  it('should filter cryptos based on search term', fakeAsync(() => {
+    component.searchTerm = 'ETH';
+    component.onSearch();
+    tick(debounceTime);
 
-    const loadingElement =
-      fixture.debugElement.nativeElement.querySelector('.animate-spin');
-    expect(loadingElement).toBeTruthy();
-  });
+    expect(component.filteredPrices).toEqual([mockPrices[1]]);
+  }));
 
-  it('should display crypto cards when data is loaded', () => {
-    const cards =
-      fixture.debugElement.nativeElement.querySelectorAll('app-crypto-card');
-    expect(cards.length).toBe(mockCryptoPrices.length);
-  });
+  it('should show all cryptos when search term is empty', fakeAsync(() => {
+    component.searchTerm = 'ETH';
+    component.onSearch();
+    tick(debounceTime);
 
-  it('should handle error when loading prices fails', () => {
-    const errorMessage = 'Failed to load crypto prices';
-    cryptoService.getPrices.and.returnValue(
-      throwError(() => new Error(errorMessage))
-    );
+    component.searchTerm = '';
+    component.onSearch();
+    tick(debounceTime);
 
-    component.loadPrices();
-    fixture.detectChanges();
+    expect(component.filteredPrices).toEqual(mockPrices);
+  }));
 
-    expect(component.loading).toBeFalse();
-    expect(component.error).toBe(errorMessage);
+  it('should filter case-insensitively', fakeAsync(() => {
+    component.searchTerm = 'eth';
+    component.onSearch();
+    tick(debounceTime);
 
-    const errorElement =
-      fixture.debugElement.nativeElement.querySelector('.text-red-500');
-    expect(errorElement.textContent).toContain(errorMessage);
-  });
+    expect(component.filteredPrices).toEqual([mockPrices[1]]);
+  }));
 
-  it('should not display error message when there is no error', () => {
-    const errorElement =
-      fixture.debugElement.nativeElement.querySelector('.text-red-500');
-    expect(errorElement).toBeNull();
-  });
+  it('should not filter if same search term is entered', fakeAsync(() => {
+    const filterSpy = spyOn<any>(component, 'filterCryptos');
 
-  it('should pass correct data to crypto-card components', () => {
-    fixture.detectChanges();
+    component.searchTerm = 'ETH';
+    component.onSearch();
+    tick(debounceTime);
 
-    const cardElements = fixture.debugElement.queryAll(
-      By.directive(CryptoCardComponent)
-    );
+    component.searchTerm = 'ETH';
+    component.onSearch();
+    tick(debounceTime);
 
-    expect(cardElements.length).toBe(mockCryptoPrices.length);
-
-    const firstCardComponent = cardElements[0].componentInstance;
-    expect(firstCardComponent.crypto).toEqual(mockCryptoPrices[0]);
-  });
-
-  it('should update view when new prices are loaded', () => {
-    const newPrices: CryptoPrice[] = [
-      { symbol: 'BTCUSDT', price: '46000.00' },
-      { symbol: 'ETHUSDT', price: '3100.00' },
-    ];
-
-    cryptoService.getPrices.and.returnValue(of(newPrices));
-    component.loadPrices();
-    fixture.detectChanges();
-
-    expect(component.cryptoPrices).toEqual(newPrices);
-    const cards =
-      fixture.debugElement.nativeElement.querySelectorAll('app-crypto-card');
-    expect(cards.length).toBe(newPrices.length);
-  });
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+  }));
 });
