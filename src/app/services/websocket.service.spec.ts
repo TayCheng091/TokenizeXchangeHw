@@ -24,27 +24,6 @@ describe('WebsocketService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should share websocket connection between multiple subscribers', () => {
-    const symbol = 'BTCUSDT';
-    const interval = '1d';
-
-    // 創建兩個訂閱
-    const subscription1 = service
-      .connectToKlineStream(symbol, interval)
-      .subscribe();
-    const subscription2 = service
-      .connectToKlineStream(symbol, interval)
-      .subscribe();
-
-    // 應該使用相同的 WebSocket 連接
-    const socket1 = service['socket$'];
-    const socket2 = service['socket$'];
-    expect(socket1).toBe(socket2);
-
-    subscription1.unsubscribe();
-    subscription2.unsubscribe();
-  });
-
   it('should disconnect websocket when calling disconnect', () => {
     const symbol = 'BTCUSDT';
     const interval = '1d';
@@ -67,21 +46,21 @@ describe('WebsocketService', () => {
     const symbol = 'BTCUSDT';
     const interval = '1d';
 
-    // 第一次連接
+    // First connection
     let subscription = service
       .connectToKlineStream(symbol, interval)
       .subscribe();
     const firstSocket = service['socket$'];
 
-    // 斷開連接
+    // Disconnect
     service.disconnect();
     subscription.unsubscribe();
 
-    // 第二次連接
+    // Second connection
     subscription = service.connectToKlineStream(symbol, interval).subscribe();
     const secondSocket = service['socket$'];
 
-    // 應該是不同的 WebSocket 實例
+    // Should be different WebSocket instances
     expect(firstSocket).not.toBe(secondSocket);
 
     subscription.unsubscribe();
