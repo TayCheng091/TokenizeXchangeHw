@@ -10,7 +10,6 @@ import {
   Subscription,
   debounceTime,
   distinctUntilChanged,
-  tap,
 } from 'rxjs';
 
 import { CryptoPrice } from '../../models/share.model';
@@ -39,13 +38,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     private ref: ChangeDetectorRef
   ) {
     this.searchSubscription = this.searchSubject
-      .pipe(
-        tap(() => this.loadingService.show()),
-        debounceTime(this.debounceTime),
-        distinctUntilChanged()
-      )
+      .pipe(debounceTime(this.debounceTime), distinctUntilChanged())
       .subscribe({
         next: (term) => {
+          this.loadingService.show();
           this.filterCryptos(term);
           this.loadingService.hide();
         },
