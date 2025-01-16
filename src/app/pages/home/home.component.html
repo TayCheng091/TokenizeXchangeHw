@@ -28,20 +28,17 @@
       <p *ngIf="!searchTerm">No cryptocurrencies available</p>
     </div>
 
-    <!-- Crypto List -->
-    <div
-      *ngIf="!error && filteredPrices.length > 0"
-      class="flex-1 overflow-hidden"
+    <!-- Crypto List with Virtual Scroll -->
+    <cdk-virtual-scroll-viewport
+      class="card-container flex-1"
+      [itemSize]="itemSize"
+      [minBufferPx]="cardHeight * 8"
+      [maxBufferPx]="cardHeight * 12"
     >
-      <div
-        class="h-full overflow-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-[minmax(116px,116px)]"
-      >
-        <app-crypto-card
-          class="h-[116px]"
-          *ngFor="let crypto of filteredPrices"
-          [crypto]="crypto"
-        ></app-crypto-card>
-      </div>
-    </div>
+      <app-crypto-card
+        *cdkVirtualFor="let crypto of filteredPrices"
+        [crypto]="crypto"
+      ></app-crypto-card>
+    </cdk-virtual-scroll-viewport>
   </div>
 </div>
