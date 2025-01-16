@@ -1,3 +1,4 @@
+import { ChartInterval } from '../models/share.model';
 import { TestBed } from '@angular/core/testing';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebsocketService } from './websocket.service';
@@ -26,7 +27,7 @@ describe('WebsocketService', () => {
 
   it('should disconnect websocket when calling disconnect', () => {
     const symbol = 'BTCUSDT';
-    const interval = '1d';
+    const interval = ChartInterval.ONE_DAY;
 
     const subscription = service
       .connectToKlineStream(symbol, interval)
@@ -44,7 +45,7 @@ describe('WebsocketService', () => {
 
   it('should create new connection after disconnect', () => {
     const symbol = 'BTCUSDT';
-    const interval = '1d';
+    const interval = ChartInterval.ONE_DAY;
 
     // First connection
     let subscription = service
